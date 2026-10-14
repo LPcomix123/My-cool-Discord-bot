@@ -1,37 +1,30 @@
 import os
-import secrets
 
 import discord
-from discord import app_commands
 from dotenv import load_dotenv
 
 load_dotenv()
 
-token = os.getenv("TOKEN")
-if not token:
+TOKEN = os.getenv("TOKEN")
+if not TOKEN:
     raise RuntimeError("TOKEN is missing from .env")
 
-
-class MyBot(discord.Client):
-    def __init__(self):
-        super().__init__(intents=discord.Intents.default())
-        self.tree = app_commands.CommandTree(self)
-
-    async def setup_hook(self):
-        await self.tree.sync()
+intents = discord.Intents.default()
+client = discord.Client(intents=intents)
 
 
-bot = MyBot()
-
-
-@bot.event
+@client.event
 async def on_ready():
-    print(f"Logged in as {bot.user}")
+    print(f"Logged in as {client.user}")
 
 
-@bot.tree.command(name="ping", description="Check if the bot is online")
-async def ping(interaction: discord.Interaction):
-    await interaction.response.send_message("Pong!")
+@client.event
+async def on_message(message):
+    if message.author == client.user:
+        return
+
+    if message.content.lower() == "!ping":
+        await message.channel.send("Pong!")
 
 
-bot.run(token)
+client.run(TOKEN)
